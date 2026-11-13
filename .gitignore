@@ -1,0 +1,28 @@
+# ModelSim / Questa generated data
+work/
+*.wlf
+*.vcd
+*.fst
+*.vstf
+vsim.dbg
+transcript
+modelsim.ini
+*.log
+
+# Build products
+obj_dir/
+*.qdb
+*.bak
+*.tmp
+
+# Private licensing / credentials
+*.lic
+license.dat
+*.key
+*.pem
+.env
+.env.*
+
+# OS
+Thumbs.db
+desktop.ini
