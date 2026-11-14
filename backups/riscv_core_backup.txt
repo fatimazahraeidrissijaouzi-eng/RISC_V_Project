@@ -1,0 +1,189 @@
+`timescale 1ns/1ps
+
+module riscv_core (
+    input logic clk,
+    input logic rst,
+    output logic [31:0] pc_debug,
+    output logic [31:0] instruction_debug
+);
+
+    logic [31:0] pc, pc_next;
+    logic [31:0] imem [0:255];
+    logic [31:0] dmem [0:255];
+    logic [31:0] registers [0:31];
+    logic [31:0] instruction;
+
+    logic [6:0] opcode, funct7;
+    logic [2:0] funct3;
+    logic [4:0] rs1, rs2, rd;
+
+    logic [31:0] imm_i, imm_s, imm_b, imm_j;
+    logic [31:0] rs1_data, rs2_data;
+    logic [31:0] alu_result, writeback_data;
+    logic reg_write, mem_write;
+
+    integer i;
+
+    // Initialisation de la memoire d'instructions
+    initial begin
+        for (i = 0; i < 256; i = i + 1)
+            imem[i] = 32'h00000013;
+
+        $readmemh("program/program.hex", imem);
+    end
+
+    // Lecture de l'instruction
+    always_comb begin
+        if (pc < 32'd1024 && pc[1:0] == 2'b00)
+            instruction = imem[pc[9:2]];
+        else
+            instruction = 32'h00000013;
+    end
+
+    // Decodage
+    assign opcode = instruction[6:0];
+    assign rd = instruction[11:7];
+    assign funct3 = instruction[14:12];
+    assign rs1 = instruction[19:15];
+    assign rs2 = instruction[24:20];
+    assign funct7 = instruction[31:25];
+
+    // Immediats
+    assign imm_i = {{20{instruction[31]}},
+                    instruction[31:20]};
+
+    assign imm_s = {{20{instruction[31]}},
+                    instruction[31:25],
+                    instruction[11:7]};
+
+    assign imm_b = {{19{instruction[31]}},
+                    instruction[31],
+                    instruction[7],
+                    instruction[30:25],
+                    instruction[11:8],
+                    1'b0};
+
+    assign imm_j = {{11{instruction[31]}},
+                    instruction[31],
+                    instruction[19:12],
+                    instruction[20],
+                    instruction[30:21],
+                    1'b0};
+
+    // Lecture des registres
+    assign rs1_data =
+        (rs1 == 0) ? 32'd0 : registers[rs1];
+
+    assign rs2_data =
+        (rs2 == 0) ? 32'd0 : registers[rs2];
+
+    // Execution des instructions
+    always_comb begin
+
+        alu_result = 32'd0;
+        writeback_data = 32'd0;
+        reg_write = 1'b0;
+        mem_write = 1'b0;
+        pc_next = pc + 32'd4;
+
+        case (opcode)
+
+            // ADDI
+            7'b0010011: begin
+                if (funct3 == 3'b000) begin
+                    alu_result = rs1_data + imm_i;
+                    writeback_data = alu_result;
+                    reg_write = 1'b1;
+                end
+            end
+
+            // ADD et SUB
+            7'b0110011: begin
+                if (funct3 == 3'b000) begin
+                    if (funct7 == 7'b0000000) begin
+                        alu_result = rs1_data + rs2_data;
+                        reg_write = 1'b1;
+                    end
+                    else if (funct7 == 7'b0100000) begin
+                        alu_result = rs1_data - rs2_data;
+                        reg_write = 1'b1;
+                    end
+
+                    writeback_data = alu_result;
+                end
+            end
+
+            // LW
+            7'b0000011: begin
+                if (funct3 == 3'b010) begin
+                    alu_result = rs1_data + imm_i;
+
+                    if (alu_result < 32'd1024 &&
+                        alu_result[1:0] == 2'b00) begin
+
+                        writeback_data =
+                            dmem[alu_result[9:2]];
+
+                        reg_write = 1'b1;
+                    end
+                end
+            end
+
+            // SW
+            7'b0100011: begin
+                if (funct3 == 3'b010) begin
+                    alu_result = rs1_data + imm_s;
+
+                    if (alu_result < 32'd1024 &&
+                        alu_result[1:0] == 2'b00)
+                        mem_write = 1'b1;
+                end
+            end
+
+            // BEQ
+            7'b1100011: begin
+                if (funct3 == 3'b000 &&
+                    rs1_data == rs2_data)
+                    pc_next = pc + imm_b;
+            end
+
+            // JAL
+            7'b1101111: begin
+                writeback_data = pc + 32'd4;
+                reg_write = 1'b1;
+                pc_next = pc + imm_j;
+            end
+
+            default: begin
+            end
+
+        endcase
+    end
+
+    // Mise a jour des registres et de la memoire
+    always_ff @(posedge clk or posedge rst) begin
+        if (rst) begin
+            pc <= 32'd0;
+
+            for (int k = 0; k < 32; k = k + 1)
+                registers[k] <= 32'd0;
+
+            for (int k = 0; k < 256; k = k + 1)
+                dmem[k] <= 32'd0;
+        end
+        else begin
+            pc <= pc_next;
+            registers[0] <= 32'd0;
+
+            if (reg_write && rd != 0)
+                registers[rd] <= writeback_data;
+
+            if (mem_write)
+                dmem[alu_result[9:2]] <= rs2_data;
+        end
+    end
+
+    assign pc_debug = pc;
+    assign instruction_debug = instruction;
+
+endmodule
