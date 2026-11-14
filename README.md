@@ -6,6 +6,13 @@ A SystemVerilog hardware design and verification project implementing a **32-bit
 
 ## Architecture
 
+![RV32I pipeline and UART AXI4-Lite architecture](docs/architecture.svg)
+
+## Simulation and FPGA results at a glance
+
+![ModelSim verification and Quartus Prime results](docs/results.svg)
+
+
 ```text
                  RISC-V RV32I CPU
               IF → ID → EX → MEM → WB
