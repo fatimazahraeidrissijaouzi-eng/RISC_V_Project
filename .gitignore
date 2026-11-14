@@ -26,3 +26,16 @@ license.dat
 # OS
 Thumbs.db
 desktop.ini
+
+# Additional simulator scratch files
+wlft*
+*.wlf*
+*.vcd.gz
+*.vpd
+
+# Local editor and synthesis caches
+.vscode/
+.Xil/
+incremental_db/
+db/
+output_files/
