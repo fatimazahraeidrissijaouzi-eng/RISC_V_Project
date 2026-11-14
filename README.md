@@ -2,7 +2,7 @@
 
 A SystemVerilog hardware design and verification project implementing a **32-bit RISC-V (RV32I) processor**, a **five-stage pipeline**, and a **memory-mapped UART peripheral connected through AXI4-Lite**.
 
-> **Project status:** RTL and simulation testbenches published. Functional simulation scenarios have been exercised locally; complete regression, FPGA synthesis, timing closure, and hardware validation are not claimed.
+> **Project status (November 2026):** RTL and testbenches published; selected functional simulations passed locally. FPGA synthesis completed successfully with Quartus Prime Lite, and internal register-to-register timing was analyzed at a 50 MHz target. Full external I/O timing closure, exhaustive protocol verification, and physical FPGA-board validation are **not** claimed.
 
 ## Architecture
 
@@ -71,9 +71,11 @@ Relevant testbenches include:
 | UVM-inspired UART scenario | 6 | 0 |
 | Three UART values (`0x55`, `0xA5`, `0x3C`) | 6 | 0 |
 
-These figures describe earlier local runs; they have **not been rerun or independently verified as part of this GitHub publication**. They are not evidence of exhaustive AXI compliance, synthesis, or timing closure.
+These figures describe earlier local runs; they have **not been rerun or independently verified as part of this GitHub documentation update**. They are not evidence of exhaustive AXI compliance or physical-board validation.
 
-## Simulation with ModelSim / Questa
+An additional local run of `tb_riscv_pipeline_sva.sv` reported **137 checks, 0 errors**, with **2 stalls, 9 forwarding events and 1 flush** for the exercised program. This is scenario-based validation, not formal proof or exhaustive coverage.
+
+## Simulation with ModelSim
 
 Run the simulator **from the repository root**, so `program/program.hex` resolves correctly. Compile the RTL first and **select one testbench top at a time**. For example:
 
@@ -89,14 +91,21 @@ On Windows, wildcard expansion and simulator versions may vary. If necessary, co
 
 ## Tools
 
-SystemVerilog · ModelSim / Questa · VS Code
+SystemVerilog · ModelSim · Quartus Prime Lite 25.1 · VS Code · GitHub
+
+## FPGA synthesis and timing (Quartus Prime Lite)
+
+The integrated SoC top `riscv_uart_soc` was compiled for an **Intel Cyclone V 5CGXFC7C6F23C6** target. The reported local compilation completed with **0 errors** (warnings remain). The timing constraints use a **20.000 ns clock period (50 MHz)**. Internal setup and hold analyses reported positive slack, including a reported worst internal setup slack of **+6.325 ns**. The UART receive synchronizer's `rx_meta` → `rx_sync` setup path was analyzed with **+14.927 ns** slack.
+
+**Important scope limitation:** the design has **59 unconstrained output ports** in the timing report, including debug signals and UART TX. No physical board or pin assignments were used; therefore these results **do not establish full external I/O timing closure or hardware operation**. The `uart_rx` input is synchronized and its asynchronous path to the first synchronizer register is excluded from synchronous timing analysis.
 
 ## Limitations and next steps
 
 - Extend AXI4-Lite error handling, corner-case and backpressure regression.
-- Automate repeatable test runs and capture simulator logs.
-- Perform FPGA synthesis, constraints, timing analysis and hardware validation.
+- Automate repeatable test runs and preserve simulator logs and Quartus reports as reproducible evidence.
+- Complete board-specific I/O constraints and pin assignments **if** a target FPGA board becomes available; perform hardware validation only then.
 - Expand functional coverage and document results with reproducible evidence.
+- The UVM-inspired testbench uses SystemVerilog classes and UVM concepts; it is **not** a full standards-based UVM environment.
 
 ## Notes
 
