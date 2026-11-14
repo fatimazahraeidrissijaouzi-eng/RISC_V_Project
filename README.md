@@ -50,6 +50,20 @@ The UART peripheral decodes these local offsets:
 
 The AXI4-Lite peripheral supports independently arriving write-address and write-data channels, and returns AXI response codes for supported/error cases. The SoC integrates a CPU-to-AXI4-Lite bridge. See [`rtl/uart_axi4_lite.sv`](rtl/uart_axi4_lite.sv) for the implementation.
 
+## Verified project highlights
+
+The following results were captured in local ModelSim and Quartus Prime sessions (November 2026):
+
+| Evidence | Observed result | Scope |
+| --- | --- | --- |
+| Pipeline SVA testbench | **137 checks, 0 errors** | Tested instruction sequence; 2 stalls, 9 forwarding events, 1 flush |
+| Integrated RISC-V + UART SoC | **6 checks, 0 errors** | UART receive, MMIO transfer, AXI stall and UART transmit scenario |
+| UVM-inspired SoC testbench | **6 tests, 0 errors** | Sequencer/driver/monitor-style scenario; not full UVM |
+| Quartus Prime full compilation | **Successful, 0 errors, 24 warnings** | Intel Cyclone V target; 6,675 / 56,480 ALMs (12%) |
+| UART RX synchronizer setup path | **+14.927 ns slack** | Specific `rx_meta` to `rx_sync` path at a 20 ns clock period |
+
+These are **scenario-specific simulation and implementation reports**, not exhaustive verification, full I/O timing closure, or a physical FPGA demonstration.
+
 ## Verification
 
 Relevant testbenches include:
@@ -62,13 +76,11 @@ Relevant testbenches include:
 - [`tb/tb_riscv_uart_uvm_inspired.sv`](tb/tb_riscv_uart_uvm_inspired.sv) — sequencer, driver, monitor, scoreboard-inspired structure
 - [`tb/tb_riscv_uart_multi_transactions.sv`](tb/tb_riscv_uart_multi_transactions.sv) — successive UART transactions
 
-### Previously reported local simulation results (November 2026)
+### Additional previously reported local simulation results (November 2026)
 
 | Scenario | Reported checks | Reported errors |
 | --- | ---: | ---: |
 | AXI4-Lite bridge | 12 | 0 |
-| RISC-V + UART SoC | 6 | 0 |
-| UVM-inspired UART scenario | 6 | 0 |
 | Three UART values (`0x55`, `0xA5`, `0x3C`) | 6 | 0 |
 
 These figures describe earlier local runs; they have **not been rerun or independently verified as part of this GitHub documentation update**. They are not evidence of exhaustive AXI compliance or physical-board validation.
