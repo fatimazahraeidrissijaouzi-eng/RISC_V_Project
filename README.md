@@ -65,6 +65,10 @@ The following results were captured in local ModelSim and Quartus Prime sessions
 
 These are **scenario-specific simulation and implementation reports**, not exhaustive verification, full I/O timing closure, or a physical FPGA demonstration.
 
+## Validation report
+
+See [Validation and Implementation Report](docs/VALIDATION_REPORT.md) for the recorded simulation results, Quartus Flow Summary, timing scope, warning review, and remaining limitations. This documentation does not claim exhaustive verification or physical FPGA-board testing.
+
 ## Verification
 
 Relevant testbenches include:
