@@ -24,7 +24,24 @@ class axi4lite_sequence extends
 
             start_item(req);
 
-            if (!req.randomize())
+            if (!req.randomize() with {
+
+                addr inside {
+                    32'h00000000,
+                    32'h00000004,
+                    32'h00000008,
+                    32'h0000000C
+                };
+
+                if (write == 1)
+                    addr inside {
+                        32'h00000008,
+                        32'h0000000C
+                    };
+
+                strb == 4'b1111;
+
+            })
                 `uvm_fatal("SEQ", "Randomization failed")
 
             finish_item(req);
