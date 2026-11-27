@@ -26,7 +26,7 @@ The repository includes:
 - Pipeline registers, forwarding logic, and hazard detection.
 - An AXI4-Lite bridge and UART register interface.
 - UART transmit, receive, baud-generation, and top-level modules.
-- Self-checking SystemVerilog testbenches, SVA-based checks, and a **UVM-inspired** verification example (not a complete standard UVM environment).
+- Self-checking SystemVerilog testbenches, SVA-based checks, a historical **UVM-inspired** example, and a separate standard UVM 1.1d AXI4-Lite verification environment.
 
 ## Repository structure
 
@@ -34,6 +34,7 @@ The repository includes:
 | --- | --- |
 | [`rtl/`](rtl/) | Processor, pipeline, bridge, UART, and SoC RTL (23 modules/files) |
 | [`tb/`](tb/) | Unit, integration, protocol, SVA, and UVM-inspired testbenches (31 files) |
+| [`uvm/`](uvm/) | Standard UVM AXI4-Lite transactions, sequences, agent, scoreboard and functional coverage |
 | [`program/`](program/) | RISC-V instruction images and historical test-program variants (5 files) |
 
 Historical core backups and simulator-generated waveforms are intentionally not included in the active source tree.
@@ -92,6 +93,33 @@ These figures describe earlier local runs; they have **not been rerun or indepen
 
 An additional local run of `tb_riscv_pipeline_sva.sv` reported **137 checks, 0 errors**, with **2 stalls, 9 forwarding events and 1 flush** for the exercised program. This is scenario-based validation, not formal proof or exhaustive coverage.
 
+### Standard UVM AXI4-Lite verification
+
+A local ModelSim SE-64 10.6d / UVM 1.1d simulation on November 27, 2026 reported:
+
+| Metric | Result |
+| --- | ---: |
+| Transactions | 29 (10 writes, 19 reads) |
+| Passed scoreboard checks | 29 |
+| Failed checks | 0 |
+| UVM warnings / errors / fatals | 0 / 0 / 0 |
+| Functional coverage (implemented covergroup) | 83.33% |
+| Simulated time | 102 us |
+
+The environment uses directed and constrained-random sequences, a sequencer, driver, monitor, agent, scoreboard and coverage subscriber. Coverage includes operation, address, response, write strobes and operation/response cross. Partial and zero write strobes remain unexercised by the current sequence. The reported percentage is not exhaustive AXI4-Lite or SoC coverage. Results are from the supplied local simulation transcript, not an independent rerun.
+
+Run from the repository root in ModelSim (adjust the UVM include path for your installation):
+
+```tcl
+vlib uvm_work
+vlog -sv -work uvm_work uvm/axi4lite_if.sv
+vlog -sv -work uvm_work -L mtiUvm -L uvm_work +incdir+C:/modeltech64_10.6d/verilog_src/uvm-1.1d/src +incdir+uvm uvm/axi4lite_pkg.sv
+vlog -sv -work uvm_work rtl/*.sv
+vlog -sv -work uvm_work -L mtiUvm -L uvm_work uvm/tb_uvm_top.sv
+vsim -coverage -L mtiUvm -L uvm_work uvm_work.tb_uvm_top
+run -all
+```
+
 ## Simulation with ModelSim
 
 Run the simulator **from the repository root**, so `program/program.hex` resolves correctly. Compile the RTL first and **select one testbench top at a time**. For example:
@@ -108,7 +136,7 @@ On Windows, wildcard expansion and simulator versions may vary. If necessary, co
 
 ## Tools
 
-SystemVerilog · ModelSim · Quartus Prime Lite 25.1 · VS Code · GitHub
+SystemVerilog · UVM 1.1d · ModelSim · Quartus Prime Lite 25.1 · VS Code · GitHub
 
 ## FPGA synthesis and timing (Quartus Prime Lite)
 
@@ -122,7 +150,7 @@ The integrated SoC top `riscv_uart_soc` was compiled for an **Intel Cyclone V 5C
 - Automate repeatable test runs and preserve simulator logs and Quartus reports as reproducible evidence.
 - Complete board-specific I/O constraints and pin assignments **if** a target FPGA board becomes available; perform hardware validation only then.
 - Expand functional coverage and document results with reproducible evidence.
-- The UVM-inspired testbench uses SystemVerilog classes and UVM concepts; it is **not** a full standards-based UVM environment.
+- The historical UVM-inspired testbench is distinct from the standard UVM environment in `uvm/`; the latter has scenario-specific coverage, not exhaustive protocol verification.
 
 ## Notes
 
