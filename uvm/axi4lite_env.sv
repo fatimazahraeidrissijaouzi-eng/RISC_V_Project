@@ -6,6 +6,7 @@ import uvm_pkg::*;
 
 `include "axi4lite_agent.sv"
 `include "axi4lite_scoreboard.sv"
+`include "axi4lite_coverage.sv"
 
 class axi4lite_env extends uvm_env;
 
@@ -13,9 +14,12 @@ class axi4lite_env extends uvm_env;
 
     axi4lite_agent      agent;
     axi4lite_scoreboard scoreboard;
+    axi4lite_coverage   coverage;
 
-    function new(string name = "axi4lite_env",
-                 uvm_component parent = null);
+    function new(
+        string name = "axi4lite_env",
+        uvm_component parent = null
+    );
 
         super.new(name, parent);
 
@@ -31,6 +35,9 @@ class axi4lite_env extends uvm_env;
         scoreboard = axi4lite_scoreboard::type_id::create(
             "scoreboard", this);
 
+        coverage = axi4lite_coverage::type_id::create(
+            "coverage", this);
+
     endfunction
 
     function void connect_phase(uvm_phase phase);
@@ -39,6 +46,9 @@ class axi4lite_env extends uvm_env;
 
         agent.monitor.ap.connect(
             scoreboard.analysis_export);
+
+        agent.monitor.ap.connect(
+            coverage.analysis_export);
 
     endfunction
 
