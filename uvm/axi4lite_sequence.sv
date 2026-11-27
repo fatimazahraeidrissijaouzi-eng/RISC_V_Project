@@ -71,42 +71,83 @@ class axi4lite_sequence extends
 
         end
 
-        // SLVERR: write to read-only RX_DATA
+        // SLVERR
         send_transaction(1, 32'h00000004,
                          32'h12345678, 4'hF);
 
-        // DECERR: invalid write address
+        // DECERR
         send_transaction(1, 32'h00000010,
                          32'hAABBCCDD, 4'hF);
 
-        // DECERR: invalid read address
         send_transaction(0, 32'h00000010,
                          32'h0, 4'hF);
 
-        // DECERR: out-of-range write address
         send_transaction(1, 32'h00000100,
                          32'h12345678, 4'hF);
 
-        // DECERR: out-of-range read address
         send_transaction(0, 32'h00000100,
                          32'h0, 4'hF);
 
-        // CONTROL register: disable UART
+        // Disable UART
         send_transaction(1, 32'h0000000C,
                          32'h0, 4'hF);
 
         send_transaction(0, 32'h0000000C,
                          32'h0, 4'hF);
 
-        // CONTROL register: enable UART
+        // Enable UART
         send_transaction(1, 32'h0000000C,
                          32'h1, 4'hF);
 
         send_transaction(0, 32'h0000000C,
                          32'h0, 4'hF);
 
+        // ==================================
+        // COVERAGE CLOSURE
+        // ==================================
+
+        // Partial write: disable UART
+        send_transaction(1, 32'h0000000C,
+                         32'h0, 4'h1);
+
+        send_transaction(0, 32'h0000000C,
+                         32'h0, 4'hF);
+
+        // Partial write: upper byte only
+        // UART must remain disabled
+        send_transaction(1, 32'h0000000C,
+                         32'h1, 4'h2);
+
+        send_transaction(0, 32'h0000000C,
+                         32'h0, 4'hF);
+
+        // Zero strobe: register unchanged
+        send_transaction(1, 32'h0000000C,
+                         32'h1, 4'h0);
+
+        send_transaction(0, 32'h0000000C,
+                         32'h0, 4'hF);
+
+        // Partial write: enable UART
+        send_transaction(1, 32'h0000000C,
+                         32'h1, 4'h1);
+
+        send_transaction(0, 32'h0000000C,
+                         32'h0, 4'hF);
+
+        // Ensure all valid read addresses
+        // are exercised
+        send_transaction(0, 32'h00000000,
+                         32'h0, 4'hF);
+
+        send_transaction(0, 32'h00000004,
+                         32'h0, 4'hF);
+
+        send_transaction(0, 32'h00000008,
+                         32'h0, 4'hF);
+
         `uvm_info("SEQ",
-            "Random and directed tests completed",
+            "Coverage closure tests completed",
             UVM_LOW)
 
     endtask
