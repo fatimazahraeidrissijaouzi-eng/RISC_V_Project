@@ -52,7 +52,7 @@ class axi4lite_test extends uvm_test;
 
         seq.start(env.agent.sequencer);
 
-        if (env.scoreboard.total_transactions != 20)
+        if (env.scoreboard.total_transactions != 29)
             `uvm_error("TEST",
                 "Unexpected number of transactions")
 
