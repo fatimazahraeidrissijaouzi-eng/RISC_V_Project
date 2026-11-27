@@ -45,7 +45,12 @@ class axi4lite_coverage extends
         }
 
         cross_operation_response:
-            cross cp_operation, cp_response;
+            cross cp_operation, cp_response {
+                // UART RTL returns only OKAY or DECERR on reads.
+                ignore_bins read_slverr =
+                    binsof(cp_operation.read_op) &&
+                    binsof(cp_response.slverr);
+            }
 
     endgroup
 
