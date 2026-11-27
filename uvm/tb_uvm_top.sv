@@ -14,6 +14,9 @@ module tb_uvm_top;
 
     axi4lite_if axi_if(aclk);
 
+    // SVA protocol checker
+    axi4lite_assertions sva_checker(axi_if);
+
     uart_axi4_lite #(
         .CLK_FREQ(1000000),
         .BAUD_RATE(100000)
