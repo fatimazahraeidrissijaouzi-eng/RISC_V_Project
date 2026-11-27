@@ -13,11 +13,11 @@ class axi4lite_test extends uvm_test;
 
     axi4lite_env env;
 
-    function new(string name = "axi4lite_test",
-                 uvm_component parent = null);
-
+    function new(
+        string name = "axi4lite_test",
+        uvm_component parent = null
+    );
         super.new(name, parent);
-
     endfunction
 
     function void build_phase(uvm_phase phase);
@@ -30,7 +30,8 @@ class axi4lite_test extends uvm_test;
     endfunction
 
     function void end_of_elaboration_phase(
-        uvm_phase phase);
+        uvm_phase phase
+    );
 
         super.end_of_elaboration_phase(phase);
 
@@ -52,9 +53,12 @@ class axi4lite_test extends uvm_test;
 
         seq.start(env.agent.sequencer);
 
-        if (env.scoreboard.total_transactions != 29)
+        if (env.scoreboard.total_transactions != 40)
             `uvm_error("TEST",
-                "Unexpected number of transactions")
+                $sformatf(
+                    "Expected 40 transactions, received %0d",
+                    env.scoreboard.total_transactions
+                ))
 
         `uvm_info("TEST",
             "AXI4-Lite UVM test completed",
