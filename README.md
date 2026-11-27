@@ -120,6 +120,11 @@ vsim -coverage -L mtiUvm -L uvm_work uvm_work.tb_uvm_top
 run -all
 ```
 
+
+### Latest local UVM and SVA results (November 27, 2026)
+
+The latest local ModelSim transcript reports 40 transactions (14 writes, 26 reads), 40 passed scoreboard checks, zero failed checks, zero UVM warnings/errors/fatals, and 100% functional coverage of the locally implemented covergroup at 139 us. Seven SVA assertions were loaded with zero reported failures; five stability assertions had zero recorded passes and two response assertions had one recorded pass each. Backpressure verification remains incomplete. These results were not independently rerun. The local source revisions are not yet synchronized with this repository; the earlier results above describe the published environment.
+
 ## Simulation with ModelSim
 
 Run the simulator **from the repository root**, so `program/program.hex` resolves correctly. Compile the RTL first and **select one testbench top at a time**. For example:
