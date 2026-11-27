@@ -115,6 +115,7 @@ vlib uvm_work
 vlog -sv -work uvm_work uvm/axi4lite_if.sv
 vlog -sv -work uvm_work -L mtiUvm -L uvm_work +incdir+C:/modeltech64_10.6d/verilog_src/uvm-1.1d/src +incdir+uvm uvm/axi4lite_pkg.sv
 vlog -sv -work uvm_work rtl/*.sv
+vlog -sv -work uvm_work -L uvm_work uvm/axi4lite_assertions.sv
 vlog -sv -work uvm_work -L mtiUvm -L uvm_work uvm/tb_uvm_top.sv
 vsim -coverage -L mtiUvm -L uvm_work uvm_work.tb_uvm_top
 run -all
@@ -123,7 +124,7 @@ run -all
 
 ### Latest local UVM and SVA results (November 27, 2026)
 
-The latest local ModelSim transcript reports 40 transactions (14 writes, 26 reads), 40 passed scoreboard checks, zero failed checks, zero UVM warnings/errors/fatals, and 100% functional coverage of the locally implemented covergroup at 139 us. Seven SVA assertions were loaded with zero reported failures; five stability assertions had zero recorded passes and two response assertions had one recorded pass each. Backpressure verification remains incomplete. These results were not independently rerun. The local source revisions are not yet synchronized with this repository; the earlier results above describe the published environment.
+The latest local ModelSim transcript reports 40 transactions (14 writes, 26 reads), 40 passed scoreboard checks, zero failed checks, zero UVM warnings/errors/fatals, and 100% functional coverage of the locally implemented covergroup at 139 us. Seven SVA assertions were loaded with zero reported failures; five stability assertions had zero recorded passes and two response assertions had one recorded pass each. Backpressure verification remains incomplete. These results were not independently rerun. The uploaded local source revisions have now been synchronized with this repository; the earlier results above describe a historical run.
 
 ## Simulation with ModelSim
 
